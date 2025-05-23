@@ -15,7 +15,7 @@ import kotlin.math.log
 @RestController
 
 @RequestMapping("/users")
-@CrossOrigin (origins =  ["http://localhost:5173","http://localhost:5174"])
+@CrossOrigin (origins =  ["*"])
 class UserController(
     private val userService: UserService,
     private val userRegisterRepository: UserRegisterRepository
@@ -63,20 +63,4 @@ class UserController(
         }
     }
 
-//    @GetMapping("/role")
-//    fun getRoleByEmployeeId(): ResponseEntity<Any> {
-//
-//        val authentication = SecurityContextHolder.getContext().authentication
-//        val claims = authentication.credentials as Claims
-//
-//        val ibsEmpId = claims.subject.toLong()
-//
-//
-//        val role = userService.getRoleByEmployeeId(ibsEmpId)
-//        return if (role != null) {
-//            ResponseEntity.ok(role)
-//        } else {
-//            ResponseEntity.notFound().build()
-//        }
-//    }
 }
