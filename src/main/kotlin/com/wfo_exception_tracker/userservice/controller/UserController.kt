@@ -1,5 +1,6 @@
 package com.wfo_exception_tracker.userservice.controller
 
+import com.wfo_exception_tracker.userservice.dto.ChangePasswordRequest
 import com.wfo_exception_tracker.userservice.dto.UserDto
 import com.wfo_exception_tracker.userservice.entity.UserLogin
 import com.wfo_exception_tracker.userservice.entity.UserRegistration
@@ -8,7 +9,9 @@ import com.wfo_exception_tracker.userservice.service.UserService
 import io.jsonwebtoken.Claims
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
 import kotlin.math.log
 
@@ -61,6 +64,27 @@ class UserController(
         } else {
             ResponseEntity.notFound().build()
         }
+    }
+
+    @PostMapping("/change-password")
+    fun changePassword( @RequestBody request: ChangePasswordRequest): ResponseEntity<String> {
+
+        val authentication = SecurityContextHolder.getContext().authentication
+        val claims = authentication.credentials as Claims
+        val ibsEmpId = claims.subject.toLong()
+
+        try
+        {
+        val result = userService.updatePassword(ibsEmpId,request)
+        return ResponseEntity.ok(result)
+        } catch (e: UsernameNotFoundException) {
+            return ResponseEntity.notFound().build()
+        } catch (e: BadCredentialsException) {
+            return ResponseEntity.badRequest().body(e.message)
+        } catch (e: IllegalArgumentException) {
+            return ResponseEntity.badRequest().body(e.message)
+        }
+
     }
 
 }

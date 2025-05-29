@@ -1,5 +1,6 @@
 package com.wfo_exception_tracker.userservice.service
 
+import com.wfo_exception_tracker.userservice.dto.ChangePasswordRequest
 import com.wfo_exception_tracker.userservice.dto.TokenRequestDto
 import com.wfo_exception_tracker.userservice.dto.TokenResponse
 import com.wfo_exception_tracker.userservice.dto.UserDto
@@ -7,6 +8,7 @@ import com.wfo_exception_tracker.userservice.entity.UserLogin
 import com.wfo_exception_tracker.userservice.entity.UserRegistration
 import com.wfo_exception_tracker.userservice.repository.UserLoginRepository
 import com.wfo_exception_tracker.userservice.repository.UserRegisterRepository
+import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -100,6 +102,23 @@ class UserService(
         } else {
             null
         }
+    }
+
+    fun updatePassword(ibsEmpId: Long, request: ChangePasswordRequest): String {
+        val user = userLoginRepository.findByIbsEmpId(ibsEmpId)
+            ?: throw UsernameNotFoundException("User not found")
+
+        if (!passwordEncoder.matches(request.currentPassword, user.password)) {
+            throw BadCredentialsException("Current password is incorrect")
+        }
+
+        if (request.newPassword != request.confirmNewPassword) {
+            throw IllegalArgumentException("New passwords don't match")
+        }
+
+        user.setPassword( passwordEncoder.encode(request.newPassword))
+        userLoginRepository.save(user)
+        return "Password updated successfully"
     }
 
 }
